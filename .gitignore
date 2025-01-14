@@ -1,25 +1,27 @@
-# Backend - Python
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Backend specific
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/**/*.pyo
+backend/**/*.pyd
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+
+# Virtual Environment
 backend/.venv/
 backend/env/
-backend/.env
-backend/__pycache__/
-backend/*.py[cod]
-backend/.pytest_cache/
-backend/logs/
-backend/*.log
 
-# Frontend - Node.js
-frontend/node_modules/
-frontend/.env
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
-frontend/build/
-frontend/dist/
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
+# Environment variables
+backend/.env
+.env
+.env.local
+.env.*.local
 
 # IDE - VSCode
 .vscode/*
@@ -28,7 +30,7 @@ frontend/yarn-error.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# IDE - JetBrains
+# IDE - PyCharm
 .idea/
 *.iml
 
