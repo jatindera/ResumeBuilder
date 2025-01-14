@@ -1,5 +1,5 @@
 from pydantic_ai import Agent
-from app.models.resume import ResumeContent
+from app.models.resume_schemas import ResumeContent
 import json
 
 class AIService:

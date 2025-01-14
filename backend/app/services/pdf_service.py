@@ -1,6 +1,6 @@
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from app.models.resume import ResumeData
+from app.models.resume_schemas import ResumeData
 import os
 
 class PDFService:

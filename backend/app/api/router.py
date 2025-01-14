@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.models.resume import ResumeRequest, ResumeData
+from app.models.resume_schemas import ResumeRequest, ResumeData
 from app.services.ai_service import AIService
 from app.services.pdf_service import PDFService
 
