@@ -2,6 +2,7 @@ from pydantic_ai import Agent
 from app.models.resume_schemas import ResumeContent
 import json
 
+
 class AIService:
     def __init__(self):
         self.agent = Agent(
@@ -12,15 +13,17 @@ class AIService:
                 "education": ["entry1", "entry2", ...],
                 "experience": ["entry1", "entry2", ...],
                 "skills": ["skill1", "skill2", ...]
-            }"""
+            }""",
         )
 
     async def generate_resume_content(self, description: str) -> ResumeContent:
-        result = await self.agent.run(f"Create a professional resume content based on this description: {description}")
-        
+        result = await self.agent.run(
+            f"Create a professional resume content based on this description: {description}"
+        )
+
         if isinstance(result.data, str):
             content_dict = json.loads(result.data)
         else:
             content_dict = result.data
-            
+
         return ResumeContent(**content_dict)

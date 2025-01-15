@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException
-from app.models.resume_schemas import ResumeRequest, ResumeData
+from app.schemas.resume_schemas import ResumeRequest, ResumeData
 from app.services.ai_service import AIService
 from app.services.pdf_service import PDFService
 
 router = APIRouter()
 ai_service = AIService()
 pdf_service = PDFService()
+
 
 @router.post("/generate-resume", response_model=ResumeData)
 async def generate_resume(request: ResumeRequest):
@@ -16,10 +17,11 @@ async def generate_resume(request: ResumeRequest):
             email=request.email,
             phone=request.phone,
             address=request.address,
-            content=content
+            content=content,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/generate-pdf")
 async def generate_pdf(data: ResumeData):

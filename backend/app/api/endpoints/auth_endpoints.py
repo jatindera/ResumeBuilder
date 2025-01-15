@@ -18,9 +18,11 @@ GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo"
 
+
 class GoogleAuthException(HTTPException):
     def __init__(self, detail: str):
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+
 
 @router.get("/login/google")
 async def login_google():
@@ -33,33 +35,32 @@ async def login_google():
             "redirect_uri": settings.GOOGLE_REDIRECT_URI,
             "prompt": "select_account",
         }
-        
+
         query_string = "&".join(f"{k}={v}" for k, v in params.items())
         auth_url = f"{GOOGLE_AUTH_URL}?{query_string}"
-        
+
         return {"auth_url": auth_url}  # Return URL instead of redirecting
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate authentication URL"
+            detail="Failed to generate authentication URL",
         )
+
 
 @router.get("/callback")
 async def auth_callback(
-    code: str = None, 
-    error: str = None, 
-    db: Session = Depends(get_db)
+    code: str = None, error: str = None, db: Session = Depends(get_db)
 ) -> Dict[str, str]:
     """Handle Google OAuth2 callback"""
-    
+
     # Handle OAuth2 errors
     if error:
         error_details = {
             "access_denied": "User denied access",
             "invalid_request": "Invalid request",
             "invalid_scope": "Invalid scope",
-            "server_error": "Server error during authentication"
+            "server_error": "Server error during authentication",
         }
         raise GoogleAuthException(error_details.get(error, "Authentication failed"))
 
@@ -78,24 +79,24 @@ async def auth_callback(
                     "grant_type": "authorization_code",
                     "redirect_uri": settings.GOOGLE_REDIRECT_URI,
                 },
-                timeout=10.0  # Add timeout
+                timeout=10.0,  # Add timeout
             )
-            
+
             if token_response.status_code != 200:
                 raise GoogleAuthException("Failed to obtain access token")
-                
+
             token_data = token_response.json()
 
             # Get user info using access token
             user_response = await client.get(
                 GOOGLE_USERINFO_URL,
                 headers={"Authorization": f"Bearer {token_data['access_token']}"},
-                timeout=10.0
+                timeout=10.0,
             )
-            
+
             if user_response.status_code != 200:
                 raise GoogleAuthException("Failed to get user info")
-                
+
             user_data = user_response.json()
 
         # Verify email domain if needed
@@ -114,7 +115,7 @@ async def auth_callback(
                 email=email,
                 full_name=user_data.get("name", ""),
                 google_id=user_data["id"],
-                picture=user_data.get("picture")
+                picture=user_data.get("picture"),
             )
             try:
                 db.add(user)
@@ -124,7 +125,7 @@ async def auth_callback(
                 db.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Database error while creating user"
+                    detail="Database error while creating user",
                 )
 
         # Create access token
@@ -132,7 +133,7 @@ async def auth_callback(
             data={
                 "sub": user.email,
                 "google_id": user.google_id,
-                "full_name": user.full_name
+                "full_name": user.full_name,
             }
         )
 
@@ -143,27 +144,27 @@ async def auth_callback(
             "user": {
                 "email": user.email,
                 "full_name": user.full_name,
-                "picture": user.picture
-            }
+                "picture": user.picture,
+            },
         }
 
     except httpx.TimeoutException:
         raise HTTPException(
             status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="Authentication request timed out"
+            detail="Authentication request timed out",
         )
     except httpx.RequestError:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Could not communicate with authentication server"
+            detail="Could not communicate with authentication server",
         )
     except GoogleAuthException as e:
         raise e
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
+
 
 # Add a test endpoint to verify token
 @router.get("/verify-token")
@@ -171,47 +172,44 @@ async def verify_token(current_user: User = Depends(get_current_user)):
     return {
         "email": current_user.email,
         "full_name": current_user.full_name,
-        "picture": current_user.picture
-    } 
+        "picture": current_user.picture,
+    }
+
 
 @router.post("/refresh-token")
-async def refresh_token(
-    refresh_token: str,
-    db: Session = Depends(get_db)
-):
+async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
     """Refresh access token using refresh token"""
     try:
         # Verify refresh token
         payload = verify_token(refresh_token, "refresh")
         if not payload:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
             )
-        
+
         # Get user
         user = db.query(User).filter(User.email == payload.get("sub")).first()
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
             )
-        
+
         # Create new token pair
-        access_token, new_refresh_token = create_token_pair({
-            "sub": user.email,
-            "google_id": user.google_id,
-            "full_name": user.full_name
-        })
-        
+        access_token, new_refresh_token = create_token_pair(
+            {
+                "sub": user.email,
+                "google_id": user.google_id,
+                "full_name": user.full_name,
+            }
+        )
+
         return {
             "access_token": access_token,
             "refresh_token": new_refresh_token,
-            "token_type": "bearer"
+            "token_type": "bearer",
         }
-        
+
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not refresh token"
-        ) 
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not refresh token"
+        )

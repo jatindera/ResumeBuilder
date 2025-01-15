@@ -1,0 +1,106 @@
+Alembic Database Migration Setup Instructions
+==========================================
+
+1. Installation
+--------------
+pip install alembic
+
+2. Initial Setup
+---------------
+cd backend
+alembic init migrations
+
+3. Configuration Files Created/Modified
+------------------------------------
+a) alembic.ini:
+   - Removed direct database URL
+   - Uses environment variables instead
+
+b) migrations/env.py:
+   - Added backend directory to Python path
+   - Configured to use settings from app.core.config
+   - Added URL encoding for special characters in password
+   - Imported Base and models
+
+c) app/models structure:
+   - base.py: Contains SQLAlchemy Base
+   - __init__.py: Imports and exports all models
+   - user.py: User model
+   - resume_models.py: Resume model
+
+4. Database Commands
+------------------
+# Create a new migration
+alembic revision --autogenerate -m "Description of changes"
+
+# Apply migrations
+alembic upgrade head
+
+# Rollback one migration
+alembic downgrade -1
+
+# Rollback to specific version
+alembic downgrade <version_id>
+
+# View migration history
+alembic history
+
+# View current version
+alembic current
+
+5. Important Notes
+----------------
+- Always review auto-generated migrations before applying
+- Special characters in database password are automatically encoded
+- Models must be imported in __init__.py to be detected
+- Base must be exported from models package
+- Run migrations after any model changes
+
+6. Directory Structure
+--------------------
+backend/
+├── alembic.ini
+├── migrations/
+│   ├── env.py
+│   ├── README
+│   ├── script.py.mako
+│   └── versions/
+├── app/
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── user.py
+│   │   └── resume_models.py
+│   └── ...
+
+7. Troubleshooting
+----------------
+- If "No changes detected", ensure models are properly imported
+- If connection errors, check database credentials in .env
+- If import errors, check Python path in env.py
+- If password contains special characters, they are automatically encoded
+
+8. Best Practices
+---------------
+- Create meaningful migration messages
+- Test migrations in development before production
+- Back up database before running migrations
+- Keep migrations version controlled
+- Review auto-generated migrations
+- Use separate migrations for data changes
+
+9. Environment Variables Required
+------------------------------
+POSTGRES_USER
+POSTGRES_PASSWORD
+POSTGRES_DB
+POSTGRES_HOST
+POSTGRES_PORT
+
+10. Common Workflow
+----------------
+1. Make changes to models
+2. Generate migration: alembic revision --autogenerate -m "Change description"
+3. Review generated migration in versions/
+4. Apply migration: alembic upgrade head
+5. Verify changes in database 

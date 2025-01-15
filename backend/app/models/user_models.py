@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean
 from app.core.database import Base
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -9,4 +10,4 @@ class User(Base):
     full_name = Column(String)
     google_id = Column(String, unique=True)
     picture = Column(String, nullable=True)
-    is_active = Column(Boolean, default=True) 
+    is_active = Column(Boolean, default=True)

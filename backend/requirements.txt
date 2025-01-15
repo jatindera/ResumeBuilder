@@ -1,6 +1,7 @@
 annotated-types==0.7.0
 anthropic==0.42.0
 anyio==4.8.0
+black==24.10.0
 cachetools==5.5.0
 certifi==2024.12.14
 chardet==5.2.0
@@ -8,6 +9,8 @@ charset-normalizer==3.4.1
 click==8.1.8
 colorama==0.4.6
 distro==1.9.0
+dnspython==2.7.0
+email_validator==2.2.0
 eval_type_backport==0.2.2
 fastapi==0.115.6
 google-auth==2.37.0
@@ -26,7 +29,11 @@ mypy-extensions==1.0.0
 mysql-connector-python==9.1.0
 mysqlclient==2.2.7
 openai==1.59.7
+packaging==24.2
+pathspec==0.12.1
 pillow==11.1.0
+platformdirs==4.3.6
+psycopg2-binary==2.9.10
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pydantic==2.10.5
