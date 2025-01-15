@@ -7,6 +7,10 @@ from urllib.parse import quote_plus
 class Settings(BaseSettings):
     # Version Settings
     VERSION: str = "1.0.0"
+    
+    # Swagger UI Settings
+    ENABLE_SWAGGER_AUTH: bool = False  # Default to False for safety
+    
     # API Settings
     API_VERSION: str = "v1"
     HOST: str = "0.0.0.0"
